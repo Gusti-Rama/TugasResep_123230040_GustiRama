@@ -6,10 +6,7 @@ import 'package:flutter_application_1/services/favorites_service.dart';
 class DetailPage extends StatefulWidget {
   final String recipeId;
 
-  const DetailPage({
-    super.key,
-    required this.recipeId,
-  });
+  const DetailPage({super.key, required this.recipeId});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -47,9 +44,7 @@ class _DetailPageState extends State<DetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isFavorite
-                ? 'Added to favorites'
-                : 'Removed from favorites',
+            _isFavorite ? 'Ditambahkan ke favorit' : 'Dihapus dari favorit',
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -61,8 +56,13 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recipe Detail'),
+        title: const Text('Detail Resep'),
         centerTitle: true,
+        titleTextStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       body: FutureBuilder<Recipe>(
         future: _recipeFuture,
@@ -76,13 +76,14 @@ class _DetailPageState extends State<DetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Error loading recipe detail'),
+                  const Text('Gagal loading resep'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _recipeFuture =
-                            ApiService.fetchRecipeDetail(widget.recipeId);
+                        _recipeFuture = ApiService.fetchRecipeDetail(
+                          widget.recipeId,
+                        );
                       });
                     },
                     child: const Text('Retry'),
@@ -95,7 +96,7 @@ class _DetailPageState extends State<DetailPage> {
           final recipe = snapshot.data;
 
           if (recipe == null) {
-            return const Center(child: Text('Recipe not found'));
+            return const Center(child: Text('Resep tidak ditemukan'));
           }
 
           return SingleChildScrollView(
@@ -110,9 +111,7 @@ class _DetailPageState extends State<DetailPage> {
                     return Container(
                       height: 300,
                       color: Colors.grey[300],
-                      child: const Center(
-                        child: Icon(Icons.error),
-                      ),
+                      child: const Center(child: Icon(Icons.error)),
                     );
                   },
                 ),
@@ -145,23 +144,76 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Row(
+                      const SizedBox(height: 12),
+
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
                         children: [
-                          Text(
-                            'Category: ${recipe.category}',
-                            style: const TextStyle(fontSize: 14),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.restaurant_menu,
+                                  size: 18,
+                                  color: Colors.orange.shade800,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  recipe.category,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade800,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(width: 16),
-                          Text(
-                            'Area: ${recipe.area}',
-                            style: const TextStyle(fontSize: 14),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 18,
+                                  color: Colors.red.shade800,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  recipe.area,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 24),
                       const Text(
-                        'Ingredients:',
+                        'Bahan - Bahan:',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -177,11 +229,17 @@ class _DetailPageState extends State<DetailPage> {
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(
                               children: [
-                                const Text('• '),
+                                const Text(
+                                  '• ',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 Expanded(
                                   child: Text(
                                     '${recipe.ingredients[index]} - ${recipe.measures[index]}',
-                                    style: const TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 15),
                                   ),
                                 ),
                               ],
@@ -191,7 +249,7 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                       const SizedBox(height: 24),
                       const Text(
-                        'Instructions:',
+                        'Cara Memasak:',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -200,13 +258,10 @@ class _DetailPageState extends State<DetailPage> {
                       const SizedBox(height: 12),
                       Text(
                         recipe.instructions,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
+                        style: const TextStyle(fontSize: 15, height: 1.6),
                         textAlign: TextAlign.justify,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),

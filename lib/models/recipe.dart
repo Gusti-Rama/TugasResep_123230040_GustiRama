@@ -23,7 +23,6 @@ class Recipe {
     List<String> ingredients = [];
     List<String> measures = [];
 
-    // Extract ingredients and measures from the API response
     for (int i = 1; i <= 20; i++) {
       String? ingredient = json['strIngredient$i'];
       String? measure = json['strMeasure$i'];

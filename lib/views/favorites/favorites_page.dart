@@ -13,81 +13,116 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favorite Recipes'),
-        centerTitle: true,
-      ),
-      body: ValueListenableBuilder(
-        valueListenable:
-            FavoritesService.getFavoritesBox().listenable(),
-        builder: (context, Box<Recipe> box, _) {
-          if (box.isEmpty) {
-            return const Center(
-              child: Text('No favorite recipes yet'),
-            );
-          }
+    return ValueListenableBuilder(
+      valueListenable: FavoritesService.getFavoritesBox().listenable(),
+      builder: (context, Box<Recipe> box, _) {
+        if (box.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  'Belum ada resep favorit',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
 
-          final favorites = box.values.toList();
+        final favorites = box.values.toList();
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: favorites.length,
-            itemBuilder: (context, index) {
-              final recipe = favorites[index];
-              return Card(
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 0.75,
+          ),
+          itemCount: favorites.length,
+          itemBuilder: (context, index) {
+            final recipe = favorites[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(
+                  context,
+                ).pushNamed('/detail', arguments: recipe.id);
+              },
+              child: Card(
                 elevation: 4,
-                margin: const EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Image.network(
-                      recipe.image,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 60,
-                          height: 60,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.error),
-                        );
-                      },
+                child: Stack(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(8),
+                            ),
+                            child: Image.network(
+                              recipe.image,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Center(child: Icon(Icons.error));
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                recipe.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  title: Text(
-                    recipe.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    recipe.category.isNotEmpty
-                        ? recipe.category
-                        : 'Recipe',
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      _showDeleteConfirmation(context, recipe);
-                    },
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pushNamed(
-                      '/detail',
-                      arguments: recipe.id,
-                    );
-                  },
+                    // X button to remove from favorites
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () {
+                          _showDeleteConfirmation(context, recipe);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -95,8 +130,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Favorite'),
-        content: Text('Remove "${recipe.name}" from favorites?'),
+        title: const Text('Hapus Favorit'),
+        content: Text('Hapus "${recipe.name}" dari favorit?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -108,12 +143,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Removed from favorites'),
+                  content: Text('Dihapus dari favorit'),
                   duration: Duration(seconds: 2),
                 ),
               );
             },
-            child: const Text('Delete'),
+            child: const Text('Hapus'),
           ),
         ],
       ),
