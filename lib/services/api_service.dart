@@ -51,37 +51,6 @@ class ApiService {
     }
   }
 
-  static Future<List<Recipe>> fetchRecipesByLetter(String letter) async {
-    try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/search.php?f=$letter'))
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> meals = data['meals'] ?? [];
-        return meals
-            .map(
-              (json) => Recipe(
-                id: json['idMeal'] ?? '',
-                name: json['strMeal'] ?? '',
-                image: json['strMealThumb'] ?? '',
-                category: '',
-                area: '',
-                instructions: '',
-                ingredients: [],
-                measures: [],
-              ),
-            )
-            .toList();
-      } else {
-        throw Exception('Gagal memuat resep');
-      }
-    } catch (e) {
-      throw Exception('Gagal mengambil resep: $e');
-    }
-  }
-
   static Future<Recipe> fetchRecipeDetail(String id) async {
     try {
       final response = await http
